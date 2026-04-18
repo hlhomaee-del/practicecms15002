@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMS-1500 Training Lab — Part 2: Multi-Payer, Workers' Comp & EOB Logic</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Fira+Code:wght@400;500&display=swap');
+:root{
+--bg:#F3F0EB;--bg2:#FFFBF5;--card:#FFF;--tx:#1C1915;--tx2:#5C5650;--tx3:#9C9590;
+--pri:#1558A0;--pri2:#0D3F73;--priL:#E0EFF9;
+--grn:#1B7040;--grnL:#E2F4EA;--grn2:#0E5028;
+--org:#C45800;--orgL:#FFF1E5;
+--red:#B52020;--redL:#FDECEC;
+--pur:#5B2D90;--purL:#EFE5FA;
+--teal:#006E65;--tealL:#DFF2F0;
+--gold:#C49000;--goldL:#FFF8E2;
+--rose:#A01050;--roseL:#FCE4ED;
+--bdr:#DCD6CE;--shd:0 2px 12px rgba(28,25,21,.05);--shd2:0 8px 32px rgba(28,25,21,.09);
+--r:10px;--r2:16px;--r3:24px;
+--hd:'Libre Baskerville',Georgia,serif;--bd:'DM Sans','Segoe UI',sans-serif;--mn:'Fira Code',monospace;
+--ease:cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:var(--bd);background:var(--bg);color:var(--tx);line-height:1.7;font-size:15px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 35%,rgba(91,45,144,.03),transparent 55%),radial-gradient(ellipse at 70% 65%,rgba(0,110,101,.025),transparent 50%);z-index:-1;pointer-events:none}
+
+.hdr{background:linear-gradient(135deg,#FFF,var(--bg2));border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,.03)}
+.hdr-in{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;max-width:1300px;margin:0 auto}
+.hdr-logo h1{font-family:var(--hd);font-size:14px;font-weight:700;color:var(--pri2);line-height:1.2}
+.hdr-logo span{font-size:10px;color:var(--tx3);letter-spacing:.4px}
+.hdr-st{display:flex;gap:10px;align-items:center}
+.pl{display:flex;align-items:center;gap:3px;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700}
+.pl-s{background:var(--grnL);color:var(--grn2)}.pl-k{background:var(--goldL);color:#8B6914}.pl-b{background:var(--purL);color:var(--pur)}
+.snd{padding:2px 8px;border-radius:8px;border:1px solid var(--bdr);background:var(--bg);font-size:9px;font-weight:600;color:var(--tx2);cursor:pointer}
+.gp{height:3px;background:var(--bdr)}.gp-f{height:100%;background:linear-gradient(90deg,var(--pur),var(--pri),var(--teal));width:0%;transition:width .7s var(--ease);border-radius:0 2px 2px 0}
+
+.nav-w{background:var(--card);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}.nav-w::-webkit-scrollbar{display:none}
+.nav{display:flex;max-width:1300px;margin:0 auto;padding:0 8px;gap:1px}
+.nb{flex-shrink:0;padding:8px 12px;border:none;background:0;font-family:var(--bd);font-size:11px;font-weight:500;color:var(--tx3);cursor:pointer;border-bottom:3px solid transparent;transition:.2s var(--ease);white-space:nowrap}
+.nb:hover{color:var(--pri);background:var(--priL)}.nb.a{color:var(--pri2);font-weight:700;border-bottom-color:var(--pri)}
+.nb .tn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--bdr);font-size:8px;font-weight:800;margin-right:3px}
+.nb.a .tn{background:var(--pri);color:#fff}.nb.d .tn{background:var(--grn);color:#fff}
+
+.mn{max-width:960px;margin:0 auto;padding:24px 16px 60px}
+.pn{display:none;animation:fu .4s var(--ease)}.pn.a{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+
+.sh{text-align:center;padding:28px 14px;margin-bottom:24px;border-radius:var(--r3);border:1px solid var(--bdr)}
+.sh h2{font-family:var(--hd);font-size:22px;color:var(--pri2);margin-bottom:4px}
+.sh p{font-size:13px;color:var(--tx2);max-width:560px;margin:0 auto}
+
+.cd{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r2);padding:22px;margin-bottom:16px;box-shadow:var(--shd);transition:.25s var(--ease)}
+.cd:hover{box-shadow:var(--shd2);transform:translateY(-1px)}
+.cd h3{font-family:var(--hd);font-size:17px;margin-bottom:8px}.cd h4{font-size:14px;font-weight:700;margin-bottom:5px}
+
+.bg{display:inline-flex;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.bg-b{background:var(--priL);color:var(--pri)}.bg-g{background:var(--grnL);color:var(--grn)}.bg-o{background:var(--orgL);color:var(--org)}.bg-r{background:var(--redL);color:var(--red)}.bg-p{background:var(--purL);color:var(--pur)}.bg-t{background:var(--tealL);color:var(--teal)}
+
+.qz{background:var(--card);border:2px solid var(--bdr);border-radius:var(--r2);padding:20px;margin:14px 0}
+.qz h4{font-family:var(--hd);color:var(--pri2);margin-bottom:8px;font-size:14px}
+.os{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.op{padding:7px 14px;border-radius:var(--r);border:2px solid var(--bdr);background:var(--card);font-family:var(--bd);font-size:12px;cursor:pointer;transition:.2s;text-align:left}
+.op:hover{border-color:var(--pri);background:var(--priL)}
+.op.c{border-color:var(--grn);background:var(--grnL);color:var(--grn2)}.op.w{border-color:var(--red);background:var(--redL);color:var(--red)}.op.x{pointer-events:none;opacity:.85}
+.fb{margin-top:8px;padding:9px 12px;border-radius:var(--r);font-size:12px;display:none;line-height:1.5}
+.fb.c{display:block;background:var(--grnL);border:1px solid #A5D6A7;color:var(--grn2)}.fb.w{display:block;background:var(--redL);border:1px solid #EF9A9A;color:var(--red)}
+
+.cl{border-radius:var(--r);padding:12px 14px;margin:10px 0;font-size:12px}
+.cl.tip{background:var(--grnL);border:1px solid #A5D6A7;border-left:4px solid var(--grn)}
+.cl.warn{background:var(--orgL);border:1px solid #FFCC80;border-left:4px solid var(--org)}
+.cl.info{background:var(--priL);border:1px solid #90CAF9;border-left:4px solid var(--pri)}
+.cl.think{background:var(--purL);border:1px solid #CE93D8;border-left:4px solid var(--pur)}
+.cl-l{font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.cl.tip .cl-l{color:var(--grn)}.cl.warn .cl-l{color:var(--org)}.cl.info .cl-l{color:var(--pri)}.cl.think .cl-l{color:var(--pur)}
+
+/* EOB Table */
+.eob{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.eob th{background:var(--pri2);color:#fff;padding:7px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.2px}
+.eob td{padding:7px 10px;border:1px solid var(--bdr);font-family:var(--mn);font-size:12px}
+.eob tr:nth-child(even){background:var(--bg)}.eob .money{text-align:right}
+.eob .highlight{background:var(--goldL);font-weight:700}
+
+/* Case Card */
+.case{background:linear-gradient(135deg,var(--priL),#FFF,var(--tealL));border:1px solid #B0CDE0;border-radius:var(--r3);padding:22px;margin:14px 0;position:relative}
+.case::after{content:'📋';position:absolute;top:10px;right:14px;font-size:24px;opacity:.2}
+.case h3{color:var(--pri2);margin-bottom:10px}
+.ci{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:12px}
+.ci .il{font-weight:700;color:var(--pri2);font-size:10px;text-transform:uppercase;letter-spacing:.2px}.ci .iv{font-family:var(--mn);font-size:11px}
+
+/* CMS Form */
+.cms{background:#FFF;border:2px solid var(--pri);border-radius:var(--r2);overflow:hidden;margin:14px 0}
+.cms-h{background:var(--pri);color:#fff;padding:8px 16px;font-family:var(--hd);font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.cms-s{padding:12px 16px;border-bottom:1px solid #E3F2FD}.cms-s:last-child{border-bottom:0}
+.cms-s h5{font-size:9px;font-weight:700;color:var(--pri);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.cms-r{display:grid;gap:6px;margin-bottom:6px}.cms-r.r2{grid-template-columns:1fr 1fr}.cms-r.r3{grid-template-columns:1fr 1fr 1fr}
+.cms-f{position:relative}
+.cms-f label{display:block;font-size:8px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px}
+.cms-f input{width:100%;padding:5px 7px;border:1px solid var(--bdr);border-radius:3px;font-family:var(--mn);font-size:11px;transition:.2s}
+.cms-f input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 2px rgba(21,88,160,.1)}
+.cms-f .tp{display:none;position:absolute;top:100%;left:0;right:0;background:var(--priL);border:1px solid #90CAF9;border-radius:3px;padding:4px 7px;font-size:9px;color:var(--pri2);z-index:10;margin-top:1px;box-shadow:var(--shd)}
+.cms-f:focus-within .tp{display:block}
+.cms-f input.ok{border-color:var(--grn);background:var(--grnL)}.cms-f input.er{border-color:var(--red);background:var(--redL)}
+.dx-g{display:grid;grid-template-columns:24px 1fr;gap:2px;align-items:center}
+.dx-l{font-family:var(--mn);font-weight:700;font-size:12px;color:var(--pri);text-align:center}
+.sv-t{width:100%;border-collapse:collapse;font-size:10px}
+.sv-t th{background:var(--priL);color:var(--pri2);padding:4px 5px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.2px;border:1px solid #BBDEFB;text-align:left}
+.sv-t td{padding:3px 4px;border:1px solid var(--bdr)}
+.sv-t input{width:100%;border:none;font-family:var(--mn);font-size:10px;padding:2px;background:transparent}
+.sv-t input:focus{outline:none;background:var(--priL)}
+
+/* Calc input */
+.calc-in{display:inline-flex;align-items:center;gap:6px;margin:4px 0}
+.calc-in label{font-size:12px;font-weight:600;color:var(--tx2)}
+.calc-in input{width:90px;padding:5px 8px;border:1px solid var(--bdr);border-radius:4px;font-family:var(--mn);font-size:13px;text-align:right}
+.calc-in input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 2px rgba(21,88,160,.1)}
+
+.btn{display:inline-flex;align-items:center;gap:5px;padding:9px 20px;border-radius:18px;border:none;font-family:var(--bd);font-size:12px;font-weight:600;cursor:pointer;transition:.3s var(--ease)}
+.btn-p{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;box-shadow:0 3px 12px rgba(21,88,160,.2)}.btn-p:hover{transform:translateY(-2px)}
+.btn-g{background:var(--grn);color:#fff}.btn-g:hover{background:var(--grn2)}
+.btn-s{border:2px solid var(--pri);background:0;color:var(--pri)}.btn-s:hover{background:var(--pri);color:#fff}
+.btn-copy{background:var(--pur);color:#fff;padding:10px 24px;font-size:13px;border-radius:var(--r)}.btn-copy:hover{background:var(--pri2)}
+.btn-comp{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:12px;border-radius:var(--r);border:2px solid var(--grn);background:var(--grnL);color:var(--grn2);font-family:var(--bd);font-size:14px;font-weight:700;cursor:pointer;margin-top:20px}
+.btn-comp:hover{background:var(--grn);color:#fff}.btn-comp.dn{background:var(--grn);color:#fff;cursor:default}
+
+.sum-box{background:linear-gradient(135deg,var(--priL),#FFF,var(--grnL));border:2px solid var(--pri);border-radius:var(--r3);padding:22px;margin:14px 0}
+.sum-box h3{font-family:var(--hd);color:var(--pri2);margin-bottom:10px}
+.sum-r{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--bdr);font-size:12px}.sum-r:last-child{border:none}
+.sum-r .sl{font-weight:600;color:var(--tx2)}.sum-r .sv{font-weight:700;color:var(--pri)}
+.copy-a{width:100%;min-height:100px;padding:10px;border:2px dashed var(--pri);border-radius:var(--r);font-family:var(--mn);font-size:10px;background:var(--bg);margin:10px 0;white-space:pre-wrap}
+textarea{width:100%;min-height:50px;padding:8px 10px;border:1px solid var(--bdr);border-radius:var(--r);font-family:var(--bd);font-size:12px;line-height:1.5;resize:vertical}
+textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 2px rgba(21,88,160,.08)}
+textarea::placeholder{color:var(--tx3);font-style:italic}
+
+.toast{position:fixed;top:60px;right:16px;padding:8px 14px;border-radius:var(--r);background:var(--grn);color:#fff;font-weight:700;font-size:11px;z-index:9999;transform:translateX(120%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--shd2)}.toast.show{transform:translateX(0)}
+.ftr{text-align:center;padding:16px;font-size:9px;color:var(--tx3);border-top:1px solid var(--bdr);background:var(--card)}
+.mob{display:none;padding:4px;border:none;background:0;cursor:pointer;color:var(--tx);font-size:16px}
+@media(max-width:768px){.hdr-st{display:none}.mob{display:block}.mn{padding:12px 10px 50px}.sh{padding:18px 10px}.sh h2{font-size:18px}.cd{padding:14px}.nb{padding:6px 8px;font-size:10px}.cms-r.r2,.cms-r.r3{grid-template-columns:1fr}.ci{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">+10!</div>
+
+<header class="hdr">
+<div class="hdr-in">
+<div class="hdr-logo"><h1>CMS-1500 Claim Form Training Lab</h1><span>Part 2 — Multi-Payer, Workers' Comp, EOB & Advanced Practice</span></div>
+<div class="hdr-st">
+<div class="pl pl-s">⭐ <span id="sN">0</span></div>
+<div class="pl pl-k">🔥 <span id="kN">0</span></div>
+<div class="pl pl-b">🏅 <span id="bN">0</span></div>
+<button class="snd" onclick="tS()" id="sB">🔊</button>
+</div>
+<button class="mob" onclick="document.querySelector('.hdr-st').style.display=document.querySelector('.hdr-st').style.display==='flex'?'none':'flex'">☰</button>
+</div>
+<div class="gp"><div class="gp-f" id="gF"></div></div>
+</header>
+
+<nav class="nav-w"><div class="nav" id="nv">
+<button class="nb a" data-t="0"><span class="tn">1</span>Primary vs Secondary</button>
+<button class="nb" data-t="1"><span class="tn">2</span>Workers' Comp</button>
+<button class="nb" data-t="2"><span class="tn">3</span>After Primary Pays</button>
+<button class="nb" data-t="3"><span class="tn">4</span>EOB / Payment Math</button>
+<button class="nb" data-t="4"><span class="tn">5</span>Advanced Practice</button>
+<button class="nb" data-t="5"><span class="tn">6</span>Multi-Payer Cases</button>
+<button class="nb" data-t="6"><span class="tn">7</span>Summary</button>
+</div></nav>
+
+<main class="mn">
+
+<!-- ===== P0: PRIMARY VS SECONDARY ===== -->
+<div class="pn a" id="p0">
+<div class="sh" style="background:linear-gradient(135deg,var(--purL),#FFF,var(--priL))">
+<h2>Primary vs Secondary Insurance</h2>
+<p>Learn how to determine payer order — and why guessing can delay or deny the entire claim.</p>
+</div>
+
+<div class="qz" id="q0pk"><h4>🧠 Prior Knowledge: A patient has insurance through their own employer and also through their spouse's employer. Which is typically primary?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,true,'q0pk','Correct! Under standard COB rules, the plan where the patient is the subscriber (employee) is typically primary. The plan where they are a dependent (through spouse) is secondary.','cob')">The plan where the patient is the subscriber (their own employer)</button>
+<button class="op" onclick="chk(this,false,'q0pk','The spouse\'s plan covers the patient as a dependent — the patient\'s own plan as subscriber is typically primary.','cob')">The spouse's plan — because it was issued first</button>
+<button class="op" onclick="chk(this,false,'q0pk','While you shouldn\'t guess, there ARE rules. The subscriber\'s own plan is typically primary.','cob')">It doesn't matter — just pick one</button>
+</div><div class="fb" id="q0pk-fb"></div></div>
+
+<div class="cd"><h3>COB Rules You Need to Know</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+<div style="background:var(--priL);padding:12px;border-radius:var(--r);border-left:4px solid var(--pri)">
+<h4 style="color:var(--pri)">Subscriber Rule</h4>
+<p style="font-size:12px">When a person has coverage as both a subscriber and a dependent, their <strong>own plan (subscriber)</strong> is primary.</p></div>
+<div style="background:var(--purL);padding:12px;border-radius:var(--r);border-left:4px solid var(--pur)">
+<h4 style="color:var(--pur)">Birthday Rule</h4>
+<p style="font-size:12px">For dependent <strong>children</strong> covered under both parents' plans: the parent whose birthday falls <strong>earlier in the calendar year</strong> is primary for the child.</p></div>
+<div style="background:var(--orgL);padding:12px;border-radius:var(--r);border-left:4px solid var(--org)">
+<h4 style="color:var(--org)">Active vs COBRA</h4>
+<p style="font-size:12px">An active employee plan is generally primary over COBRA continuation coverage.</p></div>
+<div style="background:var(--tealL);padding:12px;border-radius:var(--r);border-left:4px solid var(--teal)">
+<h4 style="color:var(--teal)">Medicare Secondary</h4>
+<p style="font-size:12px">When a patient has employer coverage AND Medicare, the employer plan is typically primary if the employer has 20+ employees (Medicare Secondary Payer rules).</p></div>
+</div></div>
+
+<div class="qz" id="q0a"><h4>A 10-year-old child is covered under both parents' plans. Mom's birthday is March 15. Dad's birthday is January 22. Whose plan is primary for the child?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,true,'q0a','Correct! The birthday rule: the parent whose birthday falls EARLIER in the calendar year (January 22 is earlier than March 15) has the primary plan for the child. This is about the calendar date — not the older parent.','cob')">Dad's plan — his birthday is earlier in the calendar year</button>
+<button class="op" onclick="chk(this,false,'q0a','The birthday rule uses the calendar date (month/day), not who is older. January 22 comes before March 15.','cob')">Mom's plan — she is older</button>
+<button class="op" onclick="chk(this,false,'q0a','The birthday rule exists specifically for this situation — you should apply it, not guess.','cob')">Either — it doesn't matter</button>
+</div><div class="fb" id="q0a-fb"></div></div>
+
+<div class="qz" id="q0b"><h4>Why does payer order matter so much?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q0b','Wrong payer order doesn\'t just cause a minor delay — it can result in outright rejection of the claim.','cob')">It only causes minor delays</button>
+<button class="op" onclick="chk(this,true,'q0b','Correct! Submitting to the wrong payer first causes rejections, payment delays, and can trigger COB issues. The secondary payer will not process the claim until the primary has adjudicated it first.','cob')">Wrong order causes rejections, delays, and the secondary won\'t pay until primary adjudicates first</button>
+<button class="op" onclick="chk(this,false,'q0b','Payers DO care about order — they apply COB rules and will reject claims submitted out of order.','cob')">Payers don't care about order</button>
+</div><div class="fb" id="q0b-fb"></div></div>
+
+<div class="cl think"><div class="cl-l">🧠 Billing Mindset</div>
+<p><strong>Always determine payer order at intake.</strong> Verify both cards, ask about other coverage, and apply COB rules before submitting. Fixing payer order after submission wastes weeks.</p></div>
+
+<button class="btn-comp" id="c0" onclick="cs(0)">✓ Mark Complete</button>
+</div>
+
+<!-- ===== P1: WORKERS' COMP ===== -->
+<div class="pn" id="p1">
+<div class="sh" style="background:linear-gradient(135deg,var(--orgL),#FFF,var(--redL))">
+<h2>Workers' Compensation Logic</h2>
+<p>When the injury is work-related, the entire billing workflow changes.</p>
+</div>
+
+<div class="cd"><h3>What Changes with Workers' Comp?</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+<div style="background:var(--orgL);padding:12px;border-radius:var(--r);border-left:4px solid var(--org)">
+<h4 style="color:var(--org)">Different Payer</h4>
+<p style="font-size:12px">Workers' comp is billed to the <strong>workers' compensation carrier</strong> — NOT the patient's regular health insurance.</p></div>
+<div style="background:var(--redL);padding:12px;border-radius:var(--r);border-left:4px solid var(--red)">
+<h4 style="color:var(--red)">No Patient Responsibility</h4>
+<p style="font-size:12px">Generally, the patient does NOT pay copays, deductibles, or coinsurance for approved work-related injuries.</p></div>
+<div style="background:var(--priL);padding:12px;border-radius:var(--r);border-left:4px solid var(--pri)">
+<h4 style="color:var(--pri)">Claim Form Changes</h4>
+<p style="font-size:12px">Item 10a must indicate the condition is <strong>employment-related</strong>. The WC carrier goes in the payer field. Employer information may be required.</p></div>
+<div style="background:var(--purL);padding:12px;border-radius:var(--r);border-left:4px solid var(--pur)">
+<h4 style="color:var(--pur)">Authorization Often Required</h4>
+<p style="font-size:12px">Many WC carriers require <strong>pre-authorization</strong> for treatment. The claim number from the WC carrier is essential.</p></div>
+</div></div>
+
+<div class="qz" id="q1a"><h4>A warehouse worker injures his back lifting boxes at work. Where should this claim be submitted?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q1a','The patient\'s regular health insurance should NOT be billed for work-related injuries — workers\' comp applies.','wc')">Patient's regular health insurance</button>
+<button class="op" onclick="chk(this,true,'q1a','Correct! Work-related injuries are billed to the employer\'s workers\' compensation insurance carrier, not the patient\'s personal health insurance.','wc')">The employer's workers' compensation carrier</button>
+<button class="op" onclick="chk(this,false,'q1a','Medicare is for age/disability — it does not cover work-related injuries. Workers\' comp handles those.','wc')">Medicare</button>
+</div><div class="fb" id="q1a-fb"></div></div>
+
+<div class="qz" id="q1b"><h4>On the CMS-1500, which item indicates the condition is employment-related?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,true,'q1b','Correct! Item 10a asks whether the patient\'s condition is related to employment. For workers\' comp claims, this must be marked YES.','wc')">Item 10a — Employment-related condition</button>
+<button class="op" onclick="chk(this,false,'q1b','Item 21 is for diagnosis codes, not for indicating the cause or context of the condition.','wc')">Item 21 — Diagnosis codes</button>
+<button class="op" onclick="chk(this,false,'q1b','Item 24D is for CPT/HCPCS procedure codes, not for condition context.','wc')">Item 24D — Service codes</button>
+</div><div class="fb" id="q1b-fb"></div></div>
+
+<div class="qz" id="q1c"><h4>Does the patient typically owe a copay for a workers' comp visit?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q1c','Workers\' comp generally does not require patient cost-sharing for approved claims.','wc')">Yes — standard copay applies</button>
+<button class="op" onclick="chk(this,true,'q1c','Correct! For approved workers\' comp claims, the patient generally does NOT owe copays, deductibles, or coinsurance. The WC carrier covers the full approved amount.','wc')">No — WC generally covers 100% of approved services</button>
+</div><div class="fb" id="q1c-fb"></div></div>
+
+<div class="cl warn"><div class="cl-l">⚠ Critical Verification Step</div>
+<p>Before billing workers' comp, verify: <strong>1)</strong> Is this truly a work-related injury? <strong>2)</strong> Does the employer have a WC policy? <strong>3)</strong> What is the WC claim number? <strong>4)</strong> Is authorization required? Billing the wrong payer delays everything.</p></div>
+
+<button class="btn-comp" id="c1" onclick="cs(1)">✓ Mark Complete</button>
+</div>
+
+<!-- ===== P2: AFTER PRIMARY PAYS ===== -->
+<div class="pn" id="p2">
+<div class="sh" style="background:linear-gradient(135deg,var(--tealL),#FFF,var(--grnL))">
+<h2>After Primary Has Paid</h2>
+<p>Learn what changes on the claim form and in your thinking when the primary insurance has already adjudicated.</p>
+</div>
+
+<div class="cd"><h3>What Happens After Primary Adjudication?</h3>
+<p style="font-size:12px;color:var(--tx2);margin-bottom:10px">When the primary insurance processes the claim, several things change for the secondary submission:</p>
+<div style="display:grid;grid-template-columns:1fr;gap:8px">
+<div class="cl info" style="margin:0"><div class="cl-l">You Now Have an EOB</div>The primary EOB shows: allowed amount, what was paid, what was applied to deductible, contractual adjustments, and remaining patient responsibility.</div>
+<div class="cl tip" style="margin:0"><div class="cl-l">Item 29 — Amount Paid</div>On the secondary claim, Item 29 should reflect the amount the primary insurance already paid.</div>
+<div class="cl warn" style="margin:0"><div class="cl-l">Attach the Primary EOB</div>The secondary payer needs the primary EOB to coordinate benefits correctly. Without it, the claim will likely be rejected or delayed.</div>
+<div class="cl think" style="margin:0"><div class="cl-l">The Secondary Processes Differently</div>The secondary payer adjudicates based on what the primary already paid. They will NOT re-adjudicate from scratch — they consider what remains.</div>
+</div></div>
+
+<div class="qz" id="q2a"><h4>When submitting a claim to secondary insurance, what goes in Item 29 (Amount Paid)?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q2a','Item 29 on the secondary claim should reflect what the PRIMARY already paid — not zero.','secondary')">$0 — the secondary hasn't paid yet</button>
+<button class="op" onclick="chk(this,true,'q2a','Correct! Item 29 on a secondary claim shows how much the primary insurance already paid. This tells the secondary payer what has been covered so they can calculate remaining responsibility.','secondary')">The amount the primary insurance paid</button>
+<button class="op" onclick="chk(this,false,'q2a','The full billed charge goes in Item 28 (Total Charge), not Item 29.','secondary')">The full billed charge</button>
+</div><div class="fb" id="q2a-fb"></div></div>
+
+<div class="qz" id="q2b"><h4>Why must the primary EOB accompany the secondary claim?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q2b','It\'s not just a courtesy — the secondary payer REQUIRES it for proper adjudication.','secondary')">It's optional — just a courtesy</button>
+<button class="op" onclick="chk(this,true,'q2b','Correct! The secondary payer needs the primary EOB to see: what was allowed, what was paid, what went to deductible, and what the patient owes. Without this, they cannot coordinate benefits properly.','secondary')">The secondary needs it to see what primary paid, denied, or applied to deductible</button>
+<button class="op" onclick="chk(this,false,'q2b','The EOB proves what the primary did — it\'s for coordination, not just record-keeping.','secondary')">Only for internal records</button>
+</div><div class="fb" id="q2b-fb"></div></div>
+
+<div class="qz" id="q2c"><h4>After both primary and secondary have processed, who is responsible for any remaining balance?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q2c','Writing off balances is only appropriate for contractual adjustments — not legitimate patient responsibility.','secondary')">The provider writes it off</button>
+<button class="op" onclick="chk(this,true,'q2c','Correct! After both insurances have processed, any remaining balance (after all contractual adjustments) is the patient\'s responsibility. This includes any remaining deductible, copay, or coinsurance not covered by either payer.','secondary')">The patient — for any remaining deductible, copay, or coinsurance</button>
+<button class="op" onclick="chk(this,false,'q2c','The primary has already adjudicated — they won\'t reprocess. Any remaining balance goes to the patient.','secondary')">The primary insurance — resubmit to them</button>
+</div><div class="fb" id="q2c-fb"></div></div>
+
+<button class="btn-comp" id="c2" onclick="cs(2)">✓ Mark Complete</button>
+</div>
+
+<!-- ===== P3: EOB / PAYMENT MATH ===== -->
+<div class="pn" id="p3">
+<div class="sh" style="background:linear-gradient(135deg,var(--grnL),#FFF,var(--goldL))">
+<h2>EOB / Payment Math</h2>
+<p>Practice the calculations billers must perform: allowed amounts, deductibles, coinsurance, and patient responsibility.</p>
+</div>
+
+<div class="cd"><h3>Understanding the Money Flow</h3>
+<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin:12px 0">
+<div style="background:var(--orgL);padding:8px 14px;border-radius:var(--r);font-weight:700;color:var(--org);font-size:12px;text-align:center">Billed<br>$300</div>
+<span style="color:var(--tx3)">→</span>
+<div style="background:var(--priL);padding:8px 14px;border-radius:var(--r);font-weight:700;color:var(--pri);font-size:12px;text-align:center">Allowed<br>$240</div>
+<span style="color:var(--tx3)">→</span>
+<div style="background:var(--redL);padding:8px 14px;border-radius:var(--r);font-weight:700;color:var(--red);font-size:12px;text-align:center">Write-off<br>$60</div>
+<span style="color:var(--tx3)">→</span>
+<div style="background:var(--goldL);padding:8px 14px;border-radius:var(--r);font-weight:700;color:#8B6914;font-size:12px;text-align:center">Deductible<br>Applied</div>
+<span style="color:var(--tx3)">→</span>
+<div style="background:var(--grnL);padding:8px 14px;border-radius:var(--r);font-weight:700;color:var(--grn);font-size:12px;text-align:center">Insurance<br>Pays %</div>
+<span style="color:var(--tx3)">→</span>
+<div style="background:var(--purL);padding:8px 14px;border-radius:var(--r);font-weight:700;color:var(--pur);font-size:12px;text-align:center">Patient<br>Owes</div>
+</div>
+<div class="cl info"><div class="cl-l">Key Formula</div>
+<p><strong>Contractual Write-off</strong> = Billed − Allowed<br>
+<strong>Applied to Deductible</strong> = Unmet deductible amount (from allowed)<br>
+<strong>Insurance Pays</strong> = (Allowed − Deductible Applied) × Insurance %<br>
+<strong>Patient Coinsurance</strong> = (Allowed − Deductible Applied) × Patient %<br>
+<strong>Total Patient Responsibility</strong> = Deductible Applied + Coinsurance + Copay</p></div>
+</div>
+
+<!-- SCENARIO 1 -->
+<div class="cd" style="border-left:4px solid var(--gold)">
+<span class="bg bg-o">Scenario 1</span>
+<h3 style="margin-top:6px">Calculate Patient Responsibility</h3>
+<p style="font-size:12px;color:var(--tx2);margin-bottom:8px">Review the EOB data below and calculate what the patient owes. Think carefully before answering.</p>
+<table class="eob">
+<thead><tr><th>Field</th><th class="money">Amount</th></tr></thead>
+<tbody>
+<tr><td>Billed Amount</td><td class="money">$350.00</td></tr>
+<tr><td>Allowed Amount (contracted rate)</td><td class="money">$280.00</td></tr>
+<tr><td>Contractual Write-off</td><td class="money">$70.00</td></tr>
+<tr><td>Patient Deductible ($1,000 total, $700 already met)</td><td class="money">$300.00 remaining</td></tr>
+<tr><td>Coinsurance Split</td><td class="money">80/20 (after deductible)</td></tr>
+<tr><td>Copay</td><td class="money">$40.00</td></tr>
+</tbody></table>
+<div class="cl think"><div class="cl-l">🧠 Think It Through</div>
+<p>How much of the allowed amount gets applied to the deductible? Is there anything left for coinsurance? Don't forget the copay. And remember — the write-off is NOT billed to the patient.</p></div>
+</div>
+
+<div class="qz" id="q3a"><h4>Scenario 1: What is the total patient responsibility?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q3a','$280 is only the deductible portion. Don\'t forget the $40 copay.','eob')">$280.00</button>
+<button class="op" onclick="chk(this,true,'q3a','Correct! The entire $280 allowed amount is absorbed by the remaining deductible ($300). Since nothing is left after deductible, the 80/20 coinsurance doesn\'t apply (there\'s $0 left to split). Insurance pays $0. Patient owes: $280 (deductible) + $40 (copay) = $320. The $70 write-off is absorbed by the provider.','eob')">$320.00</button>
+<button class="op" onclick="chk(this,false,'q3a','$350 is the billed amount. The patient pays based on the ALLOWED amount ($280), not the billed charge. The $70 difference is a contractual write-off.','eob')">$350.00</button>
+</div><div class="fb" id="q3a-fb"></div></div>
+
+<!-- SCENARIO 2 -->
+<div class="cd" style="border-left:4px solid var(--teal)">
+<span class="bg bg-t">Scenario 2 — Deductible Met</span>
+<h3 style="margin-top:6px">When the Deductible IS Fully Met</h3>
+<p style="font-size:12px;color:var(--tx2);margin-bottom:8px">This time, the deductible is already fully met. Use the data to figure out what insurance pays.</p>
+<table class="eob">
+<thead><tr><th>Field</th><th class="money">Amount</th></tr></thead>
+<tbody>
+<tr><td>Billed Amount</td><td class="money">$500.00</td></tr>
+<tr><td>Allowed Amount</td><td class="money">$400.00</td></tr>
+<tr><td>Contractual Write-off</td><td class="money">$100.00</td></tr>
+<tr><td>Deductible ($1,500 — fully met)</td><td class="money">$0 remaining</td></tr>
+<tr><td>Coinsurance Split</td><td class="money">80% insurance / 20% patient</td></tr>
+<tr><td>Copay</td><td class="money">$0 (already collected)</td></tr>
+</tbody></table>
+<div class="cl think"><div class="cl-l">🧠 Think It Through</div>
+<p>The deductible is fully met — so what amount is subject to coinsurance? Apply the 80/20 split to figure out insurance's payment.</p></div>
+</div>
+
+<div class="qz" id="q3b"><h4>Scenario 2: How much does insurance pay?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q3b','$400 is the full allowed amount — but the patient owes 20% coinsurance, so insurance pays 80%.','eob')">$400.00</button>
+<button class="op" onclick="chk(this,true,'q3b','Correct! Deductible is fully met → the entire $400 allowed amount is subject to coinsurance → Insurance pays 80% × $400 = $320. The patient owes 20% × $400 = $80. The $100 write-off ($500 billed − $400 allowed) is absorbed by the provider.','eob')">$320.00</button>
+<button class="op" onclick="chk(this,false,'q3b','$500 is the billed amount. Insurance pays based on the allowed amount ($400), not the charge.','eob')">$500.00</button>
+</div><div class="fb" id="q3b-fb"></div></div>
+
+<!-- SCENARIO 3: Secondary -->
+<div class="cd" style="border-left:4px solid var(--pur)">
+<span class="bg bg-p">Scenario 3 — Secondary Insurance</span>
+<h3 style="margin-top:6px">After Primary, What Does Secondary Cover?</h3>
+<p style="font-size:12px;color:var(--tx2);margin-bottom:8px">From Scenario 2: primary processed the claim. The patient has secondary insurance with its own allowed amount of $400 for this service. Use the data to determine what the patient owes after BOTH insurances process.</p>
+<table class="eob">
+<thead><tr><th>Field</th><th class="money">Amount</th></tr></thead>
+<tbody>
+<tr><td>Billed Amount</td><td class="money">$500.00</td></tr>
+<tr><td>Secondary's Allowed Amount</td><td class="money">$400.00</td></tr>
+<tr><td>Primary Already Paid</td><td class="money">$320.00</td></tr>
+<tr><td>Patient Coinsurance from Primary</td><td class="money">$80.00</td></tr>
+</tbody></table>
+<div class="cl think"><div class="cl-l">🧠 Think It Through</div>
+<p>The secondary payer considers what the primary paid and covers up to its own allowed amount. How much is left after the primary's payment? Will the secondary cover it? What does the patient owe at the end?</p></div>
+</div>
+
+<div class="qz" id="q3c"><h4>Scenario 3: After both insurances process, what does the patient owe?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,true,'q3c','Correct! Primary paid $320. Remaining balance on the allowed amount: $400 − $320 = $80. The secondary covers this $80 remainder (up to its own allowed amount of $400). Total paid by both: $320 + $80 = $400 (the full allowed amount). Patient owes $0. The $100 write-off ($500 − $400) is absorbed by the provider.','eob')">$0.00 — both insurances covered the full allowed amount</button>
+<button class="op" onclick="chk(this,false,'q3c','The secondary covered the $80 remainder. Patient responsibility after both insurances is $0.','eob')">$80.00 — the coinsurance</button>
+<button class="op" onclick="chk(this,false,'q3c','$100 is the contractual write-off — the provider absorbs this; it\'s not billed to the patient.','eob')">$100.00 — the write-off</button>
+</div><div class="fb" id="q3c-fb"></div></div>
+
+<button class="btn-comp" id="c3" onclick="cs(3)">✓ Mark Complete</button>
+</div>
+
+<!-- ===== P4: ADVANCED CMS-1500 PRACTICE ===== -->
+<div class="pn" id="p4">
+<div class="sh" style="background:linear-gradient(135deg,var(--priL),#FFF,var(--grnL))">
+<h2>Advanced CMS-1500 Practice</h2>
+<p>Complete a complex claim form with dual insurance, correct payer order, and prior payment information.</p>
+</div>
+
+<div class="case">
+<span class="bg bg-b">Advanced Case</span>
+<h3 style="margin-top:6px">Patient: David A. Morrison</h3>
+<div class="ci">
+<div><span class="il">DOB:</span><span class="iv">11/05/1970</span></div>
+<div><span class="il">Sex:</span><span class="iv">Male</span></div>
+<div><span class="il">Primary Insurance:</span><span class="iv">Aetna (subscriber — own employer)</span></div>
+<div><span class="il">Primary Member ID:</span><span class="iv">AET-5502891</span></div>
+<div><span class="il">Primary Group:</span><span class="iv">GRP-9940</span></div>
+<div><span class="il">Secondary Insurance:</span><span class="iv">UHC (dependent — wife's employer)</span></div>
+<div><span class="il">Secondary Member ID:</span><span class="iv">UHC-8817430</span></div>
+<div><span class="il">DOS:</span><span class="iv">05/15/2025</span></div>
+<div><span class="il">Diagnosis:</span><span class="iv">M54.5 — Low back pain</span></div>
+<div><span class="il">Service:</span><span class="iv">99214 — Office visit, moderate</span></div>
+<div><span class="il">POS:</span><span class="iv">11</span></div>
+<div><span class="il">Charge:</span><span class="iv">$275.00</span></div>
+<div><span class="il">Rendering:</span><span class="iv">Dr. Nina Torres, MD — NPI: 3344556677</span></div>
+<div><span class="il">Billing:</span><span class="iv">Midwest Spine Center — NPI: 7766554433</span></div>
+<div><span class="il">Primary EOB:</span><span class="iv">Aetna paid $176.00. Allowed $220. Write-off $55. $44 patient coinsurance.</span></div>
+</div></div>
+
+<div class="cl info"><div class="cl-l">Your Task</div>
+<p>This is the <strong>secondary claim</strong> being submitted to UHC. Fill in the form with the correct secondary billing information. Remember: Item 29 shows what the primary already paid.</p></div>
+
+<div class="cms">
+<div class="cms-h"><span>CMS-1500 — Secondary Claim to UHC</span><button style="color:#fff;border:1px solid #fff;background:0;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--bd)" onclick="chkAdv()">✓ Check</button></div>
+<div class="cms-s"><h5>Patient & Insurance (Secondary)</h5>
+<div class="cms-r r2">
+<div class="cms-f"><label>1a. Insured's ID (Secondary)</label><input id="a1a" data-a="UHC-8817430"><div class="tp">For the secondary claim, use the SECONDARY payer's member ID</div></div>
+<div class="cms-f"><label>2. Patient Name</label><input id="a2" data-a="Morrison, David"><div class="tp">Last, First</div></div>
+</div></div>
+<div class="cms-s"><h5>Item 21 — Diagnosis</h5>
+<div class="dx-g"><div class="dx-l">A.</div><div class="cms-f"><input id="a21" data-a="M54.5"><div class="tp">Low back pain = M54.5</div></div></div>
+</div>
+<div class="cms-s"><h5>Item 24 — Service Line</h5>
+<div style="overflow-x:auto"><table class="sv-t"><thead><tr><th>24A Date</th><th>24B POS</th><th>24D CPT</th><th>24E Ptr</th><th>24J NPI</th></tr></thead>
+<tbody><tr>
+<td><input id="a24a" data-a="05/15/2025"></td>
+<td><input id="a24b" data-a="11" style="width:24px"></td>
+<td><input id="a24d" data-a="99214"></td>
+<td><input id="a24e" data-a="A" style="width:24px"></td>
+<td><input id="a24j" data-a="3344556677"></td>
+</tr></tbody></table></div></div>
+<div class="cms-s"><h5>Items 28-29</h5>
+<div class="cms-r r2">
+<div class="cms-f"><label>28. Total Charge</label><input id="a28" data-a="275.00"><div class="tp">Original billed charge — same as submitted to primary</div></div>
+<div class="cms-f"><label>29. Amount Paid (by Primary)</label><input id="a29" data-a="176.00"><div class="tp">What Aetna (primary) already paid: $176.00</div></div>
+</div></div>
+<div class="cms-s"><h5>Item 33 — Billing</h5>
+<div class="cms-r r2">
+<div class="cms-f"><label>33. Name</label><input id="a33" data-a="Midwest Spine Center"><div class="tp">Billing entity</div></div>
+<div class="cms-f"><label>33a. NPI</label><input id="a33a" data-a="7766554433"><div class="tp">Billing NPI</div></div>
+</div></div>
+</div>
+<div id="advRes" style="display:none;margin-top:8px"></div>
+
+<button class="btn-comp" id="c4" onclick="cs(4)">✓ Mark Complete</button>
+</div>
+
+<!-- ===== P5: MULTI-PAYER SCENARIOS ===== -->
+<div class="pn" id="p5">
+<div class="sh" style="background:linear-gradient(135deg,var(--roseL),#FFF,var(--purL))">
+<h2>Multi-Payer Scenarios</h2>
+<p>Work through realistic cases that test COB logic, workers' comp, and payment reasoning.</p>
+</div>
+
+<!-- Scenario A -->
+<div class="cd" style="border-left:4px solid var(--rose)">
+<span class="bg bg-r">Scenario A — Workers' Comp</span>
+<h3 style="margin-top:6px">Construction Worker Falls on the Job</h3>
+<p style="font-size:12px;color:var(--tx2)">Marcus, 38, falls from scaffolding at a construction site and injures his shoulder. He has BCBS through his employer and the employer also carries Hartford workers' compensation insurance. WC claim number: WC-2025-4412.</p>
+</div>
+
+<div class="qz" id="q5a"><h4>Scenario A: Which payer should receive this claim?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q5a','BCBS is his regular health insurance. Work injuries go to the workers\' comp carrier.','multi')">BCBS — his regular insurance</button>
+<button class="op" onclick="chk(this,true,'q5a','Correct! This is a work-related injury. The claim goes to Hartford workers\' comp — NOT his personal BCBS. The WC claim number (WC-2025-4412) should be included.','multi')">Hartford Workers' Compensation</button>
+<button class="op" onclick="chk(this,false,'q5a','Billing both simultaneously would create COB confusion. WC is the sole payer for work injuries.','multi')">Both — split the bill</button>
+</div><div class="fb" id="q5a-fb"></div></div>
+
+<div class="qz" id="q5b"><h4>Scenario A: What should Item 10a show on the CMS-1500?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q5b','Marking NO would indicate this isn\'t work-related — but it clearly is a job-site injury.','multi')">No — this is a regular visit</button>
+<button class="op" onclick="chk(this,true,'q5b','Correct! Item 10a must indicate YES — the condition IS related to employment. This directs the payer and supports the workers\' comp claim routing.','multi')">Yes — condition is employment-related</button>
+</div><div class="fb" id="q5b-fb"></div></div>
+
+<!-- Scenario B -->
+<div class="cd" style="border-left:4px solid var(--pur)">
+<span class="bg bg-p">Scenario B — Dual Coverage Decision</span>
+<h3 style="margin-top:6px">Whose Plan Is Primary for the Child?</h3>
+<p style="font-size:12px;color:var(--tx2)">Emma, age 8, is covered under both parents' plans. Her mother (DOB: June 10) has Cigna through her employer. Her father (DOB: February 3) has UHC through his employer. Emma needs an office visit for an ear infection.</p>
+</div>
+
+<div class="qz" id="q5c"><h4>Scenario B: Which plan is primary for Emma?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q5c','Cigna is the mother\'s plan. The birthday rule compares calendar dates: February 3 comes before June 10.','multi')">Cigna (mother's) — mothers are always primary</button>
+<button class="op" onclick="chk(this,true,'q5c','Correct! Birthday rule: the parent whose birthday falls earlier in the calendar year (Feb 3 < June 10) has the primary plan for the child. Father\'s UHC is primary for Emma.','multi')">UHC (father's) — his birthday is earlier in the calendar year</button>
+<button class="op" onclick="chk(this,false,'q5c','The birthday rule provides a clear answer here. February 3 comes before June 10 in the calendar year.','multi')">Either — it doesn't matter for children</button>
+</div><div class="fb" id="q5c-fb"></div></div>
+
+<!-- Scenario C -->
+<div class="cd" style="border-left:4px solid var(--teal)">
+<span class="bg bg-t">Scenario C — Secondary After Primary</span>
+<h3 style="margin-top:6px">What's the Next Step?</h3>
+<p style="font-size:12px;color:var(--tx2)">A patient's primary insurance (Aetna) processed a claim for $600. Allowed: $480. Aetna paid $384 (80%). Patient coinsurance: $96. Contractual write-off: $120. The patient has BCBS as secondary.</p>
+</div>
+
+<div class="qz" id="q5d"><h4>Scenario C: What should the billing specialist do next?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q5d','Don\'t bill the patient yet — exhaust secondary insurance first.','multi')">Bill the patient $96 immediately</button>
+<button class="op" onclick="chk(this,true,'q5d','Correct! Submit the claim to BCBS (secondary) with the Aetna EOB showing $384 paid. The secondary may cover all or part of the $96 coinsurance. Always exhaust insurance options before billing the patient.','multi')">Submit to BCBS with the Aetna EOB showing $384 paid</button>
+<button class="op" onclick="chk(this,false,'q5d','The claim was correctly adjudicated — there\'s no reason to appeal. Use the secondary insurance.','multi')">Appeal to Aetna for the remaining $96</button>
+</div><div class="fb" id="q5d-fb"></div></div>
+
+<div class="qz" id="q5e"><h4>Scenario C: What amount goes in Item 29 on the secondary claim?</h4>
+<div class="os">
+<button class="op" onclick="chk(this,false,'q5e','$480 is the allowed amount, not what was paid. Item 29 shows the actual payment amount from the primary — which is $384. The allowed amount and the paid amount are different when coinsurance applies.','multi')">$480.00</button>
+<button class="op" onclick="chk(this,true,'q5e','Correct! Item 29 on the secondary claim shows the amount the primary PAID: $384.00. Here\'s the full breakdown: Billed $600 → Allowed $480 → Write-off $120 (provider absorbs) → Deductible met → Aetna pays 80% of $480 = $384 → Patient coinsurance 20% = $96 → Item 29 = $384. BCBS (secondary) will now consider the $96 remaining balance.','multi')">$384.00</button>
+<button class="op" onclick="chk(this,false,'q5e','$600 is the billed charge. Item 29 doesn\'t show the billed amount — it shows what was actually paid by the primary insurer. The primary paid $384 (80% of the $480 allowed amount).','multi')">$600.00</button>
+</div><div class="fb" id="q5e-fb"></div></div>
+
+<button class="btn-comp" id="c5" onclick="cs(5)">✓ Mark Complete</button>
+</div>
+
+<!-- ===== P6: SUMMARY ===== -->
+<div class="pn" id="p6">
+<div class="sh" style="background:linear-gradient(135deg,var(--goldL),#FFF,var(--grnL))">
+<h2>🏆 Part 2 Complete — Your Summary</h2>
+<p>Review your performance, reflect, and export your complete summary.</p>
+</div>
+
+<div style="text-align:center;padding:20px;margin-bottom:16px;background:linear-gradient(135deg,var(--goldL),#FFF,var(--grnL));border:2px solid var(--gold);border-radius:var(--r3)">
+<div style="font-size:42px;margin-bottom:6px">🏅</div>
+<h3 style="font-family:var(--hd);color:var(--grn2)">CMS-1500 Training Lab — Both Parts Complete!</h3>
+<p style="color:var(--tx2);font-size:13px">You've mastered foundations, multi-payer logic, workers' comp, and EOB calculations.</p>
+</div>
+
+<div class="sum-box">
+<h3>📊 Performance Summary</h3>
+<div class="sum-r"><span class="sl">Total Score</span><span class="sv" id="ss1">0</span></div>
+<div class="sum-r"><span class="sl">Correct Answers</span><span class="sv" id="ss2">0</span></div>
+<div class="sum-r"><span class="sl">Strongest Area</span><span class="sv" id="ss3">—</span></div>
+<div class="sum-r"><span class="sl">Area to Review</span><span class="sv" id="ss4">—</span></div>
+<div class="sum-r"><span class="sl">Next Focus</span><span class="sv" id="ss5">—</span></div>
+</div>
+
+<div class="cd"><h3>✍️ Your Reflection</h3>
+<div style="margin-bottom:10px"><label style="font-size:11px;font-weight:600;color:var(--tx2)">What did you learn today?</label><textarea id="r1" placeholder="Your key takeaways..."></textarea></div>
+<div style="margin-bottom:10px"><label style="font-size:11px;font-weight:600;color:var(--tx2)">What was challenging?</label><textarea id="r2" placeholder="What was hard or confusing?"></textarea></div>
+<div style="margin-bottom:10px"><label style="font-size:11px;font-weight:600;color:var(--tx2)">What finally clicked for you?</label><textarea id="r3" placeholder="Any aha moments?"></textarea></div>
+<div><label style="font-size:11px;font-weight:600;color:var(--tx2)">What questions do you still have?</label><textarea id="r4" placeholder="What needs more review?"></textarea></div>
+</div>
+
+<div class="cd" style="border:2px solid var(--pur)">
+<h3 style="color:var(--pur)">📋 Copy Summary for Amplify</h3>
+<p style="font-size:11px;color:var(--tx2);margin-bottom:8px">Generate your full summary, then copy to paste into Amplify.</p>
+<button class="btn btn-copy" onclick="genSum()" style="margin-bottom:8px">📝 Generate Summary</button>
+<div class="copy-a" id="cpA" style="display:none"></div>
+<button class="btn btn-g" id="cpB" onclick="cpSum()" style="display:none;margin-top:6px">📋 COPY SUMMARY FOR AMPLIFY</button>
+<div id="cpM" style="display:none;margin-top:4px;font-size:11px;color:var(--grn);font-weight:600">✅ Copied to clipboard!</div>
+</div>
+</div>
+
+</main>
+
+<footer class="ftr">© Hilary Homaii. All rights reserved.</footer>
+
+<script>
+let sc=0,strk=0,bdg=0,sOn=true,cor=0;
+const cats={cob:0,wc:0,secondary:0,eob:0,multi:0};
+const catMax={cob:3,wc:3,secondary:3,eob:3,multi:5};
+const comp=new Set();
+let actx=null;
+function gC(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx}
+function tn(f,d,t='sine',v=.08){if(!sOn)return;try{const c=gC(),o=c.createOscillator(),g=c.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d)}catch(e){}}
+function sOk(){tn(523,.1);setTimeout(()=>tn(659,.1),70);setTimeout(()=>tn(784,.12),140)}
+function sNo(){tn(330,.18,'sine',.06)}
+function sDn(){tn(523,.08);setTimeout(()=>tn(659,.08),50);setTimeout(()=>tn(784,.08),100);setTimeout(()=>tn(1047,.18),150)}
+function tS(){sOn=!sOn;document.getElementById('sB').textContent=sOn?'🔊':'🔇'}
+
+function aP(n,cat){sc+=n;cor++;if(cat)cats[cat]=(cats[cat]||0)+1;strk++;document.getElementById('sN').textContent=sc;document.getElementById('kN').textContent=strk;const t=document.getElementById('toast');t.textContent=`+${n}`;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400);sOk()}
+function rS(){strk=0;document.getElementById('kN').textContent=0}
+
+function go(i){
+  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('a',parseInt(b.dataset.t)===i));
+  document.querySelectorAll('.pn').forEach(p=>{const pi=parseInt(p.id.replace('p',''));p.classList.toggle('a',pi===i)});
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('gF').style.width=Math.round((i+1)/7*100)+'%';
+  if(i===6){genAutoSum();bdg++;document.getElementById('bN').textContent=bdg;sDn()}
+}
+document.querySelectorAll('.nb').forEach(b=>b.addEventListener('click',()=>go(parseInt(b.dataset.t))));
+
+function chk(btn,correct,qid,rat,cat){
+  const par=btn.parentElement;const fb=document.getElementById(qid+'-fb');
+  par.querySelectorAll('.op').forEach(o=>o.classList.add('x'));
+  if(correct){btn.classList.add('c');fb.className='fb c';fb.textContent=rat;aP(10,cat)}
+  else{btn.classList.add('w');fb.className='fb w';fb.textContent=rat;rS();sNo()}
+}
+
+function cs(i){if(comp.has(i))return;comp.add(i);const b=document.getElementById('c'+i);b.classList.add('dn');b.textContent='✓ Complete!';document.querySelector(`.nb[data-t="${i}"]`)?.classList.add('d');aP(20);sDn()}
+
+// Advanced form check
+function chkAdv(){
+  const ids=['a1a','a2','a21','a24a','a24b','a24d','a24e','a24j','a28','a29','a33','a33a'];
+  let c=0;
+  ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;const a=(el.dataset.a||'').toLowerCase().trim();const v=(el.value||'').toLowerCase().trim();if(v===a){c++;el.classList.remove('er');el.classList.add('ok')}else{el.classList.remove('ok');el.classList.add('er')}});
+  const r=document.getElementById('advRes');r.style.display='block';
+  const ansKey=`
+<div class="cd" style="border-left:4px solid var(--grn);margin-top:10px">
+<h4 style="color:var(--grn);margin-bottom:8px">📋 Answer Key with Rationale — ${c}/${ids.length} Correct</h4>
+<table class="eob" style="font-size:11px">
+<thead><tr><th>Field</th><th>Correct Answer</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td><strong>1a. Insured's ID</strong></td><td style="font-family:var(--mn)">UHC-8817430</td><td>This is the SECONDARY claim — use UHC's member ID, not Aetna's. Common mistake: using the primary's ID on the secondary claim.</td></tr>
+<tr><td><strong>2. Patient Name</strong></td><td style="font-family:var(--mn)">Morrison, David</td><td>Patient name stays the same regardless of which payer is being billed. Always Last, First format.</td></tr>
+<tr><td><strong>21A. Diagnosis</strong></td><td style="font-family:var(--mn)">M54.5</td><td>Low back pain — the diagnosis doesn't change between primary and secondary claims. Same medical reason for the service.</td></tr>
+<tr><td><strong>24A. Date</strong></td><td style="font-family:var(--mn)">05/15/2025</td><td>The date of service is the same — the service already happened. You're billing secondary for the same encounter.</td></tr>
+<tr><td><strong>24B. POS</strong></td><td style="font-family:var(--mn)">11</td><td>Place of Service doesn't change — the visit was in an office (POS 11) regardless of which payer is billed.</td></tr>
+<tr><td><strong>24D. CPT</strong></td><td style="font-family:var(--mn)">99214</td><td>The procedure code doesn't change — the service performed was the same office visit.</td></tr>
+<tr><td><strong>24E. Pointer</strong></td><td style="font-family:var(--mn)">A</td><td>Links to the first (and only) diagnosis in Item 21. Same logic as the primary claim.</td></tr>
+<tr><td><strong>24J. Rendering NPI</strong></td><td style="font-family:var(--mn)">3344556677</td><td>Dr. Nina Torres performed the service — her NPI goes here regardless of which payer is billed.</td></tr>
+<tr><td><strong>28. Total Charge</strong></td><td style="font-family:var(--mn)">275.00</td><td>The original billed charge stays the same on the secondary claim. You don't reduce it by what primary paid.</td></tr>
+<tr style="background:var(--goldL)"><td><strong>29. Amount Paid</strong></td><td style="font-family:var(--mn)">176.00</td><td><strong>Key field!</strong> This shows what the PRIMARY (Aetna) already paid: $176.00. This tells UHC exactly what's been covered so they can calculate the remainder.</td></tr>
+<tr><td><strong>33. Billing Name</strong></td><td style="font-family:var(--mn)">Midwest Spine Center</td><td>The billing entity doesn't change — the same practice is submitting both claims.</td></tr>
+<tr><td><strong>33a. Billing NPI</strong></td><td style="font-family:var(--mn)">7766554433</td><td>Same billing NPI — the practice identity is consistent across all payer submissions.</td></tr>
+</tbody></table>
+</div>`;
+  if(c>=ids.length-1){r.innerHTML=`<div class="cl tip"><div class="cl-l">🎉 Excellent!</div>${c}/${ids.length} correct! You handled the secondary claim accurately.</div>`+ansKey;aP(30,'secondary')}
+  else{r.innerHTML=`<div class="cl warn"><div class="cl-l">Review the Answer Key Below</div>${c}/${ids.length} correct. Study the rationale for each field — especially Item 29 (Amount Paid by Primary).</div>`+ansKey}
+}
+
+// Auto summary
+function genAutoSum(){
+  document.getElementById('ss1').textContent=sc+' pts';
+  document.getElementById('ss2').textContent=cor;
+  const cn={cob:'COB / Payer Order',wc:'Workers\' Compensation',secondary:'Secondary Billing',eob:'EOB / Payment Math',multi:'Multi-Payer Scenarios'};
+  let mx='',mxV=0,mn='',mnV=Infinity;
+  Object.keys(cats).forEach(k=>{const p=catMax[k]?cats[k]/catMax[k]:0;if(p>mxV){mxV=p;mx=k}if(p<mnV){mnV=p;mn=k}});
+  document.getElementById('ss3').textContent=cn[mx]||'—';
+  document.getElementById('ss4').textContent=cn[mn]||'—';
+  const foc={cob:'Review COB rules and birthday rule',wc:'Practice workers\' comp claim routing',secondary:'Study Item 29 and EOB attachment requirements',eob:'Practice deductible and coinsurance calculations',multi:'Work through more multi-payer cases'};
+  document.getElementById('ss5').textContent=foc[mn]||'Review all sections';
+}
+
+function genSum(){
+  genAutoSum();
+  const txt=`CMS-1500 TRAINING LAB — PART 2 SUMMARY
+==========================================
+Score: ${sc} points
+Correct: ${cor}
+Strongest: ${document.getElementById('ss3').textContent}
+Review: ${document.getElementById('ss4').textContent}
+Focus: ${document.getElementById('ss5').textContent}
+
+REFLECTION
+------------------------------------------
+What I learned: ${document.getElementById('r1')?.value||'(not answered)'}
+What was challenging: ${document.getElementById('r2')?.value||'(not answered)'}
+What clicked: ${document.getElementById('r3')?.value||'(not answered)'}
+Questions remaining: ${document.getElementById('r4')?.value||'(not answered)'}
+==========================================`;
+  document.getElementById('cpA').textContent=txt;document.getElementById('cpA').style.display='block';
+  document.getElementById('cpB').style.display='inline-flex';
+}
+
+function cpSum(){
+  const t=document.getElementById('cpA').textContent;
+  navigator.clipboard.writeText(t).then(()=>{document.getElementById('cpM').style.display='block';setTimeout(()=>document.getElementById('cpM').style.display='none',2500)}).catch(()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);document.getElementById('cpM').style.display='block';setTimeout(()=>document.getElementById('cpM').style.display='none',2500)})
+}
+</script>
+</body>
+</html>
