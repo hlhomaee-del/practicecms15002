@@ -61,7 +61,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .qz{background:var(--card);border:2px solid var(--bdr);border-radius:var(--r2);padding:20px;margin:14px 0}
 .qz h4{font-family:var(--hd);color:var(--pri2);margin-bottom:8px;font-size:14px}
 .os{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.op{padding:7px 14px;border-radius:var(--r);border:2px solid var(--bdr);background:var(--card);font-family:var(--bd);font-size:12px;cursor:pointer;transition:.2s;text-align:left}
+.op{padding:9px 14px;border-radius:var(--r);border:2px solid var(--bdr);background:var(--card);font-family:var(--bd);font-size:12px;cursor:pointer;transition:.2s;text-align:left;flex:1 1 260px;min-height:54px;display:flex;align-items:center}
 .op:hover{border-color:var(--pri);background:var(--priL)}
 .op.c{border-color:var(--grn);background:var(--grnL);color:var(--grn2)}.op.w{border-color:var(--red);background:var(--redL);color:var(--red)}.op.x{pointer-events:none;opacity:.85}
 .fb{margin-top:8px;padding:9px 12px;border-radius:var(--r);font-size:12px;display:none;line-height:1.5}
@@ -99,8 +99,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .cms-f label{display:block;font-size:8px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px}
 .cms-f input{width:100%;padding:5px 7px;border:1px solid var(--bdr);border-radius:3px;font-family:var(--mn);font-size:11px;transition:.2s}
 .cms-f input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 2px rgba(21,88,160,.1)}
-.cms-f .tp{display:none;position:absolute;top:100%;left:0;right:0;background:var(--priL);border:1px solid #90CAF9;border-radius:3px;padding:4px 7px;font-size:9px;color:var(--pri2);z-index:10;margin-top:1px;box-shadow:var(--shd)}
-.cms-f:focus-within .tp{display:block}
 .cms-f input.ok{border-color:var(--grn);background:var(--grnL)}.cms-f input.er{border-color:var(--red);background:var(--redL)}
 .dx-g{display:grid;grid-template-columns:24px 1fr;gap:2px;align-items:center}
 .dx-l{font-family:var(--mn);font-weight:700;font-size:12px;color:var(--pri);text-align:center}
@@ -178,9 +176,9 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q0pk"><h4>🧠 Prior Knowledge: A patient has insurance through their own employer and also through their spouse's employer. Which is typically primary?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,true,'q0pk','Correct! Under standard COB rules, the plan where the patient is the subscriber (employee) is typically primary. The plan where they are a dependent (through spouse) is secondary.','cob')">The plan where the patient is the subscriber (their own employer)</button>
-<button class="op" onclick="chk(this,false,'q0pk','The spouse\'s plan covers the patient as a dependent — the patient\'s own plan as subscriber is typically primary.','cob')">The spouse's plan — because it was issued first</button>
-<button class="op" onclick="chk(this,false,'q0pk','While you shouldn\'t guess, there ARE rules. The subscriber\'s own plan is typically primary.','cob')">It doesn't matter — just pick one</button>
+<button class="op" onclick="chk(this,true,'q0pk','Correct! Under standard COB rules, the plan where the patient is the subscriber (employee) is typically primary. The plan where they are a dependent (through spouse) is secondary.','cob')">Patient is subscriber; own employer plan is primary</button>
+<button class="op" onclick="chk(this,false,'q0pk','The spouse\'s plan covers the patient as a dependent — the patient\'s own plan as subscriber is typically primary.','cob')">Spouse plan is primary; card issue date controls order</button>
+<button class="op" onclick="chk(this,false,'q0pk','While you shouldn\'t guess, there ARE rules. The subscriber\'s own plan is typically primary.','cob')">Either plan may go first; payer order is optional today</button>
 </div><div class="fb" id="q0pk-fb"></div></div>
 
 <div class="cd"><h3>COB Rules You Need to Know</h3>
@@ -201,16 +199,16 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q0a"><h4>A 10-year-old child is covered under both parents' plans. Mom's birthday is March 15. Dad's birthday is January 22. Whose plan is primary for the child?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,true,'q0a','Correct! The birthday rule: the parent whose birthday falls EARLIER in the calendar year (January 22 is earlier than March 15) has the primary plan for the child. This is about the calendar date — not the older parent.','cob')">Dad's plan — his birthday is earlier in the calendar year</button>
-<button class="op" onclick="chk(this,false,'q0a','The birthday rule uses the calendar date (month/day), not who is older. January 22 comes before March 15.','cob')">Mom's plan — she is older</button>
-<button class="op" onclick="chk(this,false,'q0a','The birthday rule exists specifically for this situation — you should apply it, not guess.','cob')">Either — it doesn't matter</button>
+<button class="op" onclick="chk(this,true,'q0a','Correct! The birthday rule: the parent whose birthday falls EARLIER in the calendar year (January 22 is earlier than March 15) has the primary plan for the child. This is about the calendar date — not the older parent.','cob')">Dad plan; his birthday comes earlier in calendar year</button>
+<button class="op" onclick="chk(this,false,'q0a','The birthday rule uses the calendar date (month/day), not who is older. January 22 comes before March 15.','cob')">Mom plan; older parent's age controls payer order</button>
+<button class="op" onclick="chk(this,false,'q0a','The birthday rule exists specifically for this situation — you should apply it, not guess.','cob')">Either plan; child claims do not need COB payer order</button>
 </div><div class="fb" id="q0a-fb"></div></div>
 
 <div class="qz" id="q0b"><h4>Why does payer order matter so much?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q0b','Wrong payer order doesn\'t just cause a minor delay — it can result in outright rejection of the claim.','cob')">It only causes minor delays</button>
-<button class="op" onclick="chk(this,true,'q0b','Correct! Submitting to the wrong payer first causes rejections, payment delays, and can trigger COB issues. The secondary payer will not process the claim until the primary has adjudicated it first.','cob')">Wrong order causes rejections, delays, and the secondary won\'t pay until primary adjudicates first</button>
-<button class="op" onclick="chk(this,false,'q0b','Payers DO care about order — they apply COB rules and will reject claims submitted out of order.','cob')">Payers don't care about order</button>
+<button class="op" onclick="chk(this,false,'q0b','Wrong payer order doesn\'t just cause a minor delay — it can result in outright rejection of the claim.','cob')">Minor delay only; payer will still process later</button>
+<button class="op" onclick="chk(this,true,'q0b','Correct! Submitting to the wrong payer first causes rejections, payment delays, and can trigger COB issues. The secondary payer will not process the claim until the primary has adjudicated it first.','cob')">Wrong order; secondary waits until primary adjudicates</button>
+<button class="op" onclick="chk(this,false,'q0b','Payers DO care about order — they apply COB rules and will reject claims submitted out of order.','cob')">Payer order does not matter when both plans are active</button>
 </div><div class="fb" id="q0b-fb"></div></div>
 
 <div class="cl think"><div class="cl-l">🧠 Billing Mindset</div>
@@ -244,22 +242,22 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q1a"><h4>A warehouse worker injures his back lifting boxes at work. Where should this claim be submitted?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q1a','The patient\'s regular health insurance should NOT be billed for work-related injuries — workers\' comp applies.','wc')">Patient's regular health insurance</button>
-<button class="op" onclick="chk(this,true,'q1a','Correct! Work-related injuries are billed to the employer\'s workers\' compensation insurance carrier, not the patient\'s personal health insurance.','wc')">The employer's workers' compensation carrier</button>
-<button class="op" onclick="chk(this,false,'q1a','Medicare is for age/disability — it does not cover work-related injuries. Workers\' comp handles those.','wc')">Medicare</button>
+<button class="op" onclick="chk(this,false,'q1a','The patient\'s regular health insurance should NOT be billed for work-related injuries — workers\' comp applies.','wc')">Regular health plan; work status does not matter here</button>
+<button class="op" onclick="chk(this,true,'q1a','Correct! Work-related injuries are billed to the employer\'s workers\' compensation insurance carrier, not the patient\'s personal health insurance.','wc')">Workers comp carrier; injury occurred during work</button>
+<button class="op" onclick="chk(this,false,'q1a','Medicare is for age/disability — it does not cover work-related injuries. Workers\' comp handles those.','wc')">Medicare; any injury can be routed there first safely</button>
 </div><div class="fb" id="q1a-fb"></div></div>
 
 <div class="qz" id="q1b"><h4>On the CMS-1500, which item indicates the condition is employment-related?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,true,'q1b','Correct! Item 10a asks whether the patient\'s condition is related to employment. For workers\' comp claims, this must be marked YES.','wc')">Item 10a — Employment-related condition</button>
-<button class="op" onclick="chk(this,false,'q1b','Item 21 is for diagnosis codes, not for indicating the cause or context of the condition.','wc')">Item 21 — Diagnosis codes</button>
-<button class="op" onclick="chk(this,false,'q1b','Item 24D is for CPT/HCPCS procedure codes, not for condition context.','wc')">Item 24D — Service codes</button>
+<button class="op" onclick="chk(this,true,'q1b','Correct! Item 10a asks whether the patient\'s condition is related to employment. For workers\' comp claims, this must be marked YES.','wc')">Item 10a; marks if condition is employment related</button>
+<button class="op" onclick="chk(this,false,'q1b','Item 21 is for diagnosis codes, not for indicating the cause or context of the condition.','wc')">Item 21; lists diagnosis codes for medical necessity</button>
+<button class="op" onclick="chk(this,false,'q1b','Item 24D is for CPT/HCPCS procedure codes, not for condition context.','wc')">Item 24D; lists CPT or HCPCS procedure service code</button>
 </div><div class="fb" id="q1b-fb"></div></div>
 
 <div class="qz" id="q1c"><h4>Does the patient typically owe a copay for a workers' comp visit?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q1c','Workers\' comp generally does not require patient cost-sharing for approved claims.','wc')">Yes — standard copay applies</button>
-<button class="op" onclick="chk(this,true,'q1c','Correct! For approved workers\' comp claims, the patient generally does NOT owe copays, deductibles, or coinsurance. The WC carrier covers the full approved amount.','wc')">No — WC generally covers 100% of approved services</button>
+<button class="op" onclick="chk(this,false,'q1c','Workers\' comp generally does not require patient cost-sharing for approved claims.','wc')">Yes; regular copay applies unless plan says no</button>
+<button class="op" onclick="chk(this,true,'q1c','Correct! For approved workers\' comp claims, the patient generally does NOT owe copays, deductibles, or coinsurance. The WC carrier covers the full approved amount.','wc')">No; approved workers comp usually has no copay</button>
 </div><div class="fb" id="q1c-fb"></div></div>
 
 <div class="cl warn"><div class="cl-l">⚠ Critical Verification Step</div>
@@ -286,23 +284,23 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q2a"><h4>When submitting a claim to secondary insurance, what goes in Item 29 (Amount Paid)?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q2a','Item 29 on the secondary claim should reflect what the PRIMARY already paid — not zero.','secondary')">$0 — the secondary hasn't paid yet</button>
-<button class="op" onclick="chk(this,true,'q2a','Correct! Item 29 on a secondary claim shows how much the primary insurance already paid. This tells the secondary payer what has been covered so they can calculate remaining responsibility.','secondary')">The amount the primary insurance paid</button>
-<button class="op" onclick="chk(this,false,'q2a','The full billed charge goes in Item 28 (Total Charge), not Item 29.','secondary')">The full billed charge</button>
+<button class="op" onclick="chk(this,false,'q2a','Item 29 on the secondary claim should reflect what the PRIMARY already paid — not zero.','secondary')">$0.00; secondary has not issued payment yet</button>
+<button class="op" onclick="chk(this,true,'q2a','Correct! Item 29 on a secondary claim shows how much the primary insurance already paid. This tells the secondary payer what has been covered so they can calculate remaining responsibility.','secondary')">Primary paid amount; report prior insurer payment</button>
+<button class="op" onclick="chk(this,false,'q2a','The full billed charge goes in Item 28 (Total Charge), not Item 29.','secondary')">Full billed charge; repeat original amount from primary</button>
 </div><div class="fb" id="q2a-fb"></div></div>
 
 <div class="qz" id="q2b"><h4>Why must the primary EOB accompany the secondary claim?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q2b','It\'s not just a courtesy — the secondary payer REQUIRES it for proper adjudication.','secondary')">It's optional — just a courtesy</button>
-<button class="op" onclick="chk(this,true,'q2b','Correct! The secondary payer needs the primary EOB to see: what was allowed, what was paid, what went to deductible, and what the patient owes. Without this, they cannot coordinate benefits properly.','secondary')">The secondary needs it to see what primary paid, denied, or applied to deductible</button>
-<button class="op" onclick="chk(this,false,'q2b','The EOB proves what the primary did — it\'s for coordination, not just record-keeping.','secondary')">Only for internal records</button>
+<button class="op" onclick="chk(this,false,'q2b','It\'s not just a courtesy — the secondary payer REQUIRES it for proper adjudication.','secondary')">Optional document; useful but not required to pay</button>
+<button class="op" onclick="chk(this,true,'q2b','Correct! The secondary payer needs the primary EOB to see: what was allowed, what was paid, what went to deductible, and what the patient owes. Without this, they cannot coordinate benefits properly.','secondary')">Required proof; secondary reviews primary outcome</button>
+<button class="op" onclick="chk(this,false,'q2b','The EOB proves what the primary did — it\'s for coordination, not just record-keeping.','secondary')">Internal record only; office keeps it for chart filing</button>
 </div><div class="fb" id="q2b-fb"></div></div>
 
 <div class="qz" id="q2c"><h4>After both primary and secondary have processed, who is responsible for any remaining balance?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q2c','Writing off balances is only appropriate for contractual adjustments — not legitimate patient responsibility.','secondary')">The provider writes it off</button>
-<button class="op" onclick="chk(this,true,'q2c','Correct! After both insurances have processed, any remaining balance (after all contractual adjustments) is the patient\'s responsibility. This includes any remaining deductible, copay, or coinsurance not covered by either payer.','secondary')">The patient — for any remaining deductible, copay, or coinsurance</button>
-<button class="op" onclick="chk(this,false,'q2c','The primary has already adjudicated — they won\'t reprocess. Any remaining balance goes to the patient.','secondary')">The primary insurance — resubmit to them</button>
+<button class="op" onclick="chk(this,false,'q2c','Writing off balances is only appropriate for contractual adjustments — not legitimate patient responsibility.','secondary')">Provider writes off balance after both payers finish</button>
+<button class="op" onclick="chk(this,true,'q2c','Correct! After both insurances have processed, any remaining balance (after all contractual adjustments) is the patient\'s responsibility. This includes any remaining deductible, copay, or coinsurance not covered by either payer.','secondary')">Patient owes remaining cost share after both process</button>
+<button class="op" onclick="chk(this,false,'q2c','The primary has already adjudicated — they won\'t reprocess. Any remaining balance goes to the patient.','secondary')">Primary insurer reprocesses balance after secondary review</button>
 </div><div class="fb" id="q2c-fb"></div></div>
 
 <button class="btn-comp" id="c2" onclick="cs(2)">✓ Mark Complete</button>
@@ -358,9 +356,9 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q3a"><h4>Scenario 1: What is the total patient responsibility?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q3a','$280 is only the deductible portion. Don\'t forget the $40 copay.','eob')">$280.00</button>
-<button class="op" onclick="chk(this,true,'q3a','Correct! The entire $280 allowed amount is absorbed by the remaining deductible ($300). Since nothing is left after deductible, the 80/20 coinsurance doesn\'t apply (there\'s $0 left to split). Insurance pays $0. Patient owes: $280 (deductible) + $40 (copay) = $320. The $70 write-off is absorbed by the provider.','eob')">$320.00</button>
-<button class="op" onclick="chk(this,false,'q3a','$350 is the billed amount. The patient pays based on the ALLOWED amount ($280), not the billed charge. The $70 difference is a contractual write-off.','eob')">$350.00</button>
+<button class="op" onclick="chk(this,false,'q3a','$280 is only the deductible portion. Don\'t forget the $40 copay.','eob')">$280.00; deductible only; copay not included</button>
+<button class="op" onclick="chk(this,true,'q3a','Correct! The entire $280 allowed amount is absorbed by the remaining deductible ($300). Since nothing is left after deductible, the 80/20 coinsurance doesn\'t apply (there\'s $0 left to split). Insurance pays $0. Patient owes: $280 (deductible) + $40 (copay) = $320. The $70 write-off is absorbed by the provider.','eob')">$320.00; deductible plus copay is included</button>
+<button class="op" onclick="chk(this,false,'q3a','$350 is the billed amount. The patient pays based on the ALLOWED amount ($280), not the billed charge. The $70 difference is a contractual write-off.','eob')">$350.00; billed charge used as patient balance</button>
 </div><div class="fb" id="q3a-fb"></div></div>
 
 <!-- SCENARIO 2 -->
@@ -384,9 +382,9 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q3b"><h4>Scenario 2: How much does insurance pay?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q3b','$400 is the full allowed amount — but the patient owes 20% coinsurance, so insurance pays 80%.','eob')">$400.00</button>
-<button class="op" onclick="chk(this,true,'q3b','Correct! Deductible is fully met → the entire $400 allowed amount is subject to coinsurance → Insurance pays 80% × $400 = $320. The patient owes 20% × $400 = $80. The $100 write-off ($500 billed − $400 allowed) is absorbed by the provider.','eob')">$320.00</button>
-<button class="op" onclick="chk(this,false,'q3b','$500 is the billed amount. Insurance pays based on the allowed amount ($400), not the charge.','eob')">$500.00</button>
+<button class="op" onclick="chk(this,false,'q3b','$400 is the full allowed amount — but the patient owes 20% coinsurance, so insurance pays 80%.','eob')">$400.00; full allowed amount paid by insurer</button>
+<button class="op" onclick="chk(this,true,'q3b','Correct! Deductible is fully met → the entire $400 allowed amount is subject to coinsurance → Insurance pays 80% × $400 = $320. The patient owes 20% × $400 = $80. The $100 write-off ($500 billed − $400 allowed) is absorbed by the provider.','eob')">$320.00; deductible plus copay is included</button>
+<button class="op" onclick="chk(this,false,'q3b','$500 is the billed amount. Insurance pays based on the allowed amount ($400), not the charge.','eob')">$500.00; billed amount paid before adjustment</button>
 </div><div class="fb" id="q3b-fb"></div></div>
 
 <!-- SCENARIO 3: Secondary -->
@@ -408,9 +406,9 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q3c"><h4>Scenario 3: After both insurances process, what does the patient owe?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,true,'q3c','Correct! Primary paid $320. Remaining balance on the allowed amount: $400 − $320 = $80. The secondary covers this $80 remainder (up to its own allowed amount of $400). Total paid by both: $320 + $80 = $400 (the full allowed amount). Patient owes $0. The $100 write-off ($500 − $400) is absorbed by the provider.','eob')">$0.00 — both insurances covered the full allowed amount</button>
-<button class="op" onclick="chk(this,false,'q3c','The secondary covered the $80 remainder. Patient responsibility after both insurances is $0.','eob')">$80.00 — the coinsurance</button>
-<button class="op" onclick="chk(this,false,'q3c','$100 is the contractual write-off — the provider absorbs this; it\'s not billed to the patient.','eob')">$100.00 — the write-off</button>
+<button class="op" onclick="chk(this,true,'q3c','Correct! Primary paid $320. Remaining balance on the allowed amount: $400 − $320 = $80. The secondary covers this $80 remainder (up to its own allowed amount of $400). Total paid by both: $320 + $80 = $400 (the full allowed amount). Patient owes $0. The $100 write-off ($500 − $400) is absorbed by the provider.','eob')">$0.00; both payers covered the allowed balance</button>
+<button class="op" onclick="chk(this,false,'q3c','The secondary covered the $80 remainder. Patient responsibility after both insurances is $0.','eob')">$80.00; coinsurance still remains patient balance</button>
+<button class="op" onclick="chk(this,false,'q3c','$100 is the contractual write-off — the provider absorbs this; it\'s not billed to the patient.','eob')">$100.00; write-off remains billable to patient</button>
 </div><div class="fb" id="q3c-fb"></div></div>
 
 <button class="btn-comp" id="c3" onclick="cs(3)">✓ Mark Complete</button>
@@ -445,36 +443,36 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 </div></div>
 
 <div class="cl info"><div class="cl-l">Your Task</div>
-<p>This is the <strong>secondary claim</strong> being submitted to UHC. Fill in the form with the correct secondary billing information. Remember: Item 29 shows what the primary already paid.</p></div>
+<p>This is the <strong>secondary claim</strong> being submitted to UHC. Fill in the form with the correct secondary billing information. No answer hints appear while students are working; the complete answer key appears only after they click Check.</p></div>
 
 <div class="cms">
 <div class="cms-h"><span>CMS-1500 — Secondary Claim to UHC</span><button style="color:#fff;border:1px solid #fff;background:0;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--bd)" onclick="chkAdv()">✓ Check</button></div>
 <div class="cms-s"><h5>Patient & Insurance (Secondary)</h5>
 <div class="cms-r r2">
-<div class="cms-f"><label>1a. Insured's ID (Secondary)</label><input id="a1a" data-a="UHC-8817430"><div class="tp">For the secondary claim, use the SECONDARY payer's member ID</div></div>
-<div class="cms-f"><label>2. Patient Name</label><input id="a2" data-a="Morrison, David"><div class="tp">Last, First</div></div>
+<div class="cms-f"><label>1a. Insured's ID (Secondary)</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a1a" data-a="UHC-8817430"></div>
+<div class="cms-f"><label>2. Patient Name</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a2" data-a="Morrison, David"></div>
 </div></div>
 <div class="cms-s"><h5>Item 21 — Diagnosis</h5>
-<div class="dx-g"><div class="dx-l">A.</div><div class="cms-f"><input id="a21" data-a="M54.5"><div class="tp">Low back pain = M54.5</div></div></div>
+<div class="dx-g"><div class="dx-l">A.</div><div class="cms-f"><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a21" data-a="M54.5"></div></div>
 </div>
 <div class="cms-s"><h5>Item 24 — Service Line</h5>
 <div style="overflow-x:auto"><table class="sv-t"><thead><tr><th>24A Date</th><th>24B POS</th><th>24D CPT</th><th>24E Ptr</th><th>24J NPI</th></tr></thead>
 <tbody><tr>
-<td><input id="a24a" data-a="05/15/2025"></td>
-<td><input id="a24b" data-a="11" style="width:24px"></td>
-<td><input id="a24d" data-a="99214"></td>
-<td><input id="a24e" data-a="A" style="width:24px"></td>
-<td><input id="a24j" data-a="3344556677"></td>
+<td><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a24a" data-a="05/15/2025"></td>
+<td><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a24b" data-a="11" style="width:24px"></td>
+<td><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a24d" data-a="99214"></td>
+<td><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a24e" data-a="A" style="width:24px"></td>
+<td><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a24j" data-a="3344556677"></td>
 </tr></tbody></table></div></div>
 <div class="cms-s"><h5>Items 28-29</h5>
 <div class="cms-r r2">
-<div class="cms-f"><label>28. Total Charge</label><input id="a28" data-a="275.00"><div class="tp">Original billed charge — same as submitted to primary</div></div>
-<div class="cms-f"><label>29. Amount Paid (by Primary)</label><input id="a29" data-a="176.00"><div class="tp">What Aetna (primary) already paid: $176.00</div></div>
+<div class="cms-f"><label>28. Total Charge</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a28" data-a="275.00"></div>
+<div class="cms-f"><label>29. Amount Paid (by Primary)</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a29" data-a="176.00"></div>
 </div></div>
 <div class="cms-s"><h5>Item 33 — Billing</h5>
 <div class="cms-r r2">
-<div class="cms-f"><label>33. Name</label><input id="a33" data-a="Midwest Spine Center"><div class="tp">Billing entity</div></div>
-<div class="cms-f"><label>33a. NPI</label><input id="a33a" data-a="7766554433"><div class="tp">Billing NPI</div></div>
+<div class="cms-f"><label>33. Name</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a33" data-a="Midwest Spine Center"></div>
+<div class="cms-f"><label>33a. NPI</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="a33a" data-a="7766554433"></div>
 </div></div>
 </div>
 <div id="advRes" style="display:none;margin-top:8px"></div>
@@ -498,15 +496,15 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q5a"><h4>Scenario A: Which payer should receive this claim?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q5a','BCBS is his regular health insurance. Work injuries go to the workers\' comp carrier.','multi')">BCBS — his regular insurance</button>
-<button class="op" onclick="chk(this,true,'q5a','Correct! This is a work-related injury. The claim goes to Hartford workers\' comp — NOT his personal BCBS. The WC claim number (WC-2025-4412) should be included.','multi')">Hartford Workers' Compensation</button>
-<button class="op" onclick="chk(this,false,'q5a','Billing both simultaneously would create COB confusion. WC is the sole payer for work injuries.','multi')">Both — split the bill</button>
+<button class="op" onclick="chk(this,false,'q5a','BCBS is his regular health insurance. Work injuries go to the workers\' comp carrier.','multi')">BCBS; regular plan handles the injury first</button>
+<button class="op" onclick="chk(this,true,'q5a','Correct! This is a work-related injury. The claim goes to Hartford workers\' comp — NOT his personal BCBS. The WC claim number (WC-2025-4412) should be included.','multi')">Hartford WC; work injury uses comp carrier</button>
+<button class="op" onclick="chk(this,false,'q5a','Billing both simultaneously would create COB confusion. WC is the sole payer for work injuries.','multi')">Both payers; split claim to prevent delay</button>
 </div><div class="fb" id="q5a-fb"></div></div>
 
 <div class="qz" id="q5b"><h4>Scenario A: What should Item 10a show on the CMS-1500?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q5b','Marking NO would indicate this isn\'t work-related — but it clearly is a job-site injury.','multi')">No — this is a regular visit</button>
-<button class="op" onclick="chk(this,true,'q5b','Correct! Item 10a must indicate YES — the condition IS related to employment. This directs the payer and supports the workers\' comp claim routing.','multi')">Yes — condition is employment-related</button>
+<button class="op" onclick="chk(this,false,'q5b','Marking NO would indicate this isn\'t work-related — but it clearly is a job-site injury.','multi')">No; visit is routine even though injury occurred</button>
+<button class="op" onclick="chk(this,true,'q5b','Correct! Item 10a must indicate YES — the condition IS related to employment. This directs the payer and supports the workers\' comp claim routing.','multi')">Yes; job injury is employment related</button>
 </div><div class="fb" id="q5b-fb"></div></div>
 
 <!-- Scenario B -->
@@ -518,9 +516,9 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q5c"><h4>Scenario B: Which plan is primary for Emma?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q5c','Cigna is the mother\'s plan. The birthday rule compares calendar dates: February 3 comes before June 10.','multi')">Cigna (mother's) — mothers are always primary</button>
-<button class="op" onclick="chk(this,true,'q5c','Correct! Birthday rule: the parent whose birthday falls earlier in the calendar year (Feb 3 < June 10) has the primary plan for the child. Father\'s UHC is primary for Emma.','multi')">UHC (father's) — his birthday is earlier in the calendar year</button>
-<button class="op" onclick="chk(this,false,'q5c','The birthday rule provides a clear answer here. February 3 comes before June 10 in the calendar year.','multi')">Either — it doesn't matter for children</button>
+<button class="op" onclick="chk(this,false,'q5c','Cigna is the mother\'s plan. The birthday rule compares calendar dates: February 3 comes before June 10.','multi')">Cigna; mother plan is automatically primary</button>
+<button class="op" onclick="chk(this,true,'q5c','Correct! Birthday rule: the parent whose birthday falls earlier in the calendar year (Feb 3 < June 10) has the primary plan for the child. Father\'s UHC is primary for Emma.','multi')">UHC; father birthday comes earlier in year</button>
+<button class="op" onclick="chk(this,false,'q5c','The birthday rule provides a clear answer here. February 3 comes before June 10 in the calendar year.','multi')">Either plan; child claims do not need COB payer order</button>
 </div><div class="fb" id="q5c-fb"></div></div>
 
 <!-- Scenario C -->
@@ -532,16 +530,16 @@ textarea::placeholder{color:var(--tx3);font-style:italic}
 
 <div class="qz" id="q5d"><h4>Scenario C: What should the billing specialist do next?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q5d','Don\'t bill the patient yet — exhaust secondary insurance first.','multi')">Bill the patient $96 immediately</button>
-<button class="op" onclick="chk(this,true,'q5d','Correct! Submit the claim to BCBS (secondary) with the Aetna EOB showing $384 paid. The secondary may cover all or part of the $96 coinsurance. Always exhaust insurance options before billing the patient.','multi')">Submit to BCBS with the Aetna EOB showing $384 paid</button>
-<button class="op" onclick="chk(this,false,'q5d','The claim was correctly adjudicated — there\'s no reason to appeal. Use the secondary insurance.','multi')">Appeal to Aetna for the remaining $96</button>
+<button class="op" onclick="chk(this,false,'q5d','Don\'t bill the patient yet — exhaust secondary insurance first.','multi')">Bill patient now; secondary can be skipped</button>
+<button class="op" onclick="chk(this,true,'q5d','Correct! Submit the claim to BCBS (secondary) with the Aetna EOB showing $384 paid. The secondary may cover all or part of the $96 coinsurance. Always exhaust insurance options before billing the patient.','multi')">Submit to BCBS; include Aetna EOB payment data</button>
+<button class="op" onclick="chk(this,false,'q5d','The claim was correctly adjudicated — there\'s no reason to appeal. Use the secondary insurance.','multi')">Appeal Aetna; coinsurance means claim was denied</button>
 </div><div class="fb" id="q5d-fb"></div></div>
 
 <div class="qz" id="q5e"><h4>Scenario C: What amount goes in Item 29 on the secondary claim?</h4>
 <div class="os">
-<button class="op" onclick="chk(this,false,'q5e','$480 is the allowed amount, not what was paid. Item 29 shows the actual payment amount from the primary — which is $384. The allowed amount and the paid amount are different when coinsurance applies.','multi')">$480.00</button>
-<button class="op" onclick="chk(this,true,'q5e','Correct! Item 29 on the secondary claim shows the amount the primary PAID: $384.00. Here\'s the full breakdown: Billed $600 → Allowed $480 → Write-off $120 (provider absorbs) → Deductible met → Aetna pays 80% of $480 = $384 → Patient coinsurance 20% = $96 → Item 29 = $384. BCBS (secondary) will now consider the $96 remaining balance.','multi')">$384.00</button>
-<button class="op" onclick="chk(this,false,'q5e','$600 is the billed charge. Item 29 doesn\'t show the billed amount — it shows what was actually paid by the primary insurer. The primary paid $384 (80% of the $480 allowed amount).','multi')">$600.00</button>
+<button class="op" onclick="chk(this,false,'q5e','$480 is the allowed amount, not what was paid. Item 29 shows the actual payment amount from the primary — which is $384. The allowed amount and the paid amount are different when coinsurance applies.','multi')">$480.00; allowed amount belongs in Item 29</button>
+<button class="op" onclick="chk(this,true,'q5e','Correct! Item 29 on the secondary claim shows the amount the primary PAID: $384.00. Here\'s the full breakdown: Billed $600 → Allowed $480 → Write-off $120 (provider absorbs) → Deductible met → Aetna pays 80% of $480 = $384 → Patient coinsurance 20% = $96 → Item 29 = $384. BCBS (secondary) will now consider the $96 remaining balance.','multi')">$384.00; primary payment goes in Item 29</button>
+<button class="op" onclick="chk(this,false,'q5e','$600 is the billed charge. Item 29 doesn\'t show the billed amount — it shows what was actually paid by the primary insurer. The primary paid $384 (80% of the $480 allowed amount).','multi')">$600.00; billed charge belongs in Item 29</button>
 </div><div class="fb" id="q5e-fb"></div></div>
 
 <button class="btn-comp" id="c5" onclick="cs(5)">✓ Mark Complete</button>
@@ -614,6 +612,55 @@ function go(i){
   if(i===6){genAutoSum();bdg++;document.getElementById('bN').textContent=bdg;sDn()}
 }
 document.querySelectorAll('.nb').forEach(b=>b.addEventListener('click',()=>go(parseInt(b.dataset.t))));
+
+// Balanced answer placement: prevents the correct answer from clustering in B.
+// Each quiz group is rebuilt on load so correct answers rotate across A/B/C,
+// while distractors are still shuffled. This removes source-order bias.
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function balanceQuizOptions(){
+  const groups=[...document.querySelectorAll('.os')];
+  const threeChoicePattern=shuffleArray([0,1,2,0,1,2,0,1,2,0,1,2]);
+  const twoChoicePattern=shuffleArray([0,1,0,1,0,1]);
+  let threeN=0, twoN=0;
+
+  groups.forEach(group=>{
+    const opts=[...group.children].filter(el=>el.classList&&el.classList.contains('op'));
+    if(opts.length<2)return;
+
+    const correct=opts.find(el=>(el.getAttribute('onclick')||'').includes('chk(this,true'));
+    if(!correct){
+      shuffleArray(opts).forEach(el=>group.appendChild(el));
+      return;
+    }
+
+    const distractors=shuffleArray(opts.filter(el=>el!==correct));
+    const order=[];
+    let target;
+
+    if(opts.length===2){
+      target=twoChoicePattern[twoN++ % twoChoicePattern.length];
+    }else{
+      target=threeChoicePattern[threeN++ % threeChoicePattern.length];
+      if(target>=opts.length)target=opts.length-1;
+    }
+
+    for(let i=0;i<opts.length;i++){
+      order[i]=(i===target)?correct:distractors.shift();
+    }
+
+    order.forEach(el=>group.appendChild(el));
+  });
+}
+
+document.addEventListener('DOMContentLoaded', balanceQuizOptions);
+
 
 function chk(btn,correct,qid,rat,cat){
   const par=btn.parentElement;const fb=document.getElementById(qid+'-fb');
@@ -692,6 +739,20 @@ function cpSum(){
   const t=document.getElementById('cpA').textContent;
   navigator.clipboard.writeText(t).then(()=>{document.getElementById('cpM').style.display='block';setTimeout(()=>document.getElementById('cpM').style.display='none',2500)}).catch(()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);document.getElementById('cpM').style.display='block';setTimeout(()=>document.getElementById('cpM').style.display='none',2500)})
 }
+// Hard stop: remove any live hint/tooltip elements from the CMS advanced practice form.
+// Students should only see the answer key after clicking Check.
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.cms .tp').forEach(function(el){ el.remove(); });
+  document.querySelectorAll('.cms input').forEach(function(el){
+    el.removeAttribute('title');
+    el.removeAttribute('placeholder');
+    el.setAttribute('autocomplete','off');
+    el.setAttribute('autocorrect','off');
+    el.setAttribute('autocapitalize','off');
+    el.setAttribute('spellcheck','false');
+  });
+});
+
 </script>
 </body>
 </html>
